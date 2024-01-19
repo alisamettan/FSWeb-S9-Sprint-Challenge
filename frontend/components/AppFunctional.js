@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 // önerilen başlangıç stateleri
 const initialMessage = ''
@@ -9,6 +9,11 @@ const initialIndex = 4 //  "B" nin bulunduğu indexi
 export default function AppFunctional(props) {
   // AŞAĞIDAKİ HELPERLAR SADECE ÖNERİDİR.
   // Bunları silip kendi mantığınızla sıfırdan geliştirebilirsiniz.
+
+  const [index, setIndex] = useState(initialIndex)
+  const [message, setMessage] = useState(initialMessage)
+  const [email, setEmail] = useState(initialEmail)
+  const [steps, setSteps] = useState(initialSteps)
 
   function getXY() {
     // Koordinatları izlemek için bir state e sahip olmak gerekli değildir.
@@ -23,56 +28,111 @@ export default function AppFunctional(props) {
 
   function reset() {
     // Tüm stateleri başlangıç ​​değerlerine sıfırlamak için bu helperı kullanın.
+    setIndex(initialIndex)
+    setMessage(initialMessage)
+    setEmail(initialEmail)
+    setSteps(initialSteps)
   }
 
-  function sonrakiIndex(yon) {
+  function sonrakiIndex(targetIndex) {
     // Bu helper bir yön ("sol", "yukarı", vb.) alır ve "B" nin bir sonraki indeksinin ne olduğunu hesaplar.
     // Gridin kenarına ulaşıldığında başka gidecek yer olmadığı için,
     // şu anki indeksi değiştirmemeli.
+    setIndex(targetIndex)
+    setSteps(steps+1)
+    setMessage(initialMessage)
   }
 
   function ilerle(evt) {
     // Bu event handler, "B" için yeni bir dizin elde etmek üzere yukarıdaki yardımcıyı kullanabilir,
     // ve buna göre state i değiştirir.
-  }
-
-  function onChange(evt) {
-    // inputun değerini güncellemek için bunu kullanabilirsiniz
-  }
-
-  function onSubmit(evt) {
-    // payloadu POST etmek için bir submit handlera da ihtiyacınız var.
-  }
-
-  return (
-    <div id="wrapper" className={props.className}>
-      <div className="info">
-        <h3 id="coordinates">Koordinatlar (2, 2)</h3>
-        <h3 id="steps">0 kere ilerlediniz</h3>
-      </div>
-      <div id="grid">
-        {
-          [0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
-            <div key={idx} className={`square${idx === 4 ? ' active' : ''}`}>
-              {idx === 4 ? 'B' : null}
-            </div>
-          ))
+    const yon = evt.target.id
+    switch (yon) {
+      case 'left':
+        if (index % 3 === 0) {
+          setMessage('Sola gidemezsiniz')
+        } else {
+          sonrakiIndex(index - 1)
         }
-      </div>
-      <div className="info">
-        <h3 id="message"></h3>
-      </div>
-      <div id="keypad">
-        <button id="left">SOL</button>
-        <button id="up">YUKARI</button>
-        <button id="right">SAĞ</button>
-        <button id="down">AŞAĞI</button>
-        <button id="reset">reset</button>
-      </div>
-      <form>
-        <input id="email" type="email" placeholder="email girin"></input>
-        <input id="submit" type="submit"></input>
-      </form>
+        break;
+        case 'up':
+          if(index<3){
+            setMessage('Yukarıya gidemezsiniz')
+          }else{
+            sonrakiIndex(index-3)
+          }
+          break;
+          case 'right':
+            if(index%3===2){
+              setMessage('Sağa gidemezsiniz')
+            }else{
+              sonrakiIndex(index+1)
+            }
+            break;
+            case 'down':
+            if(index>5){
+              setMessage('Aşağıya gidemezsiniz')
+            }else{
+              sonrakiIndex(index+3)
+            }
+            break;
+    }
+  }
+
+  if (yon === 'left') {
+    if (index % 3 === 0) {
+      setMessage('Sola gidemezsiniz')
+    }
+    setIndex(index - 1)
+  }
+  if (yon === 'up') {
+    setIndex(index - 3)
+  }
+  if (yon === 'right') {
+    setIndex(index + 1)
+  }
+  if (yon === 'down') {
+    setIndex(index + 3)
+  }
+}
+
+function onChange(evt) {
+  // inputun değerini güncellemek için bunu kullanabilirsiniz
+}
+
+function onSubmit(evt) {
+  // payloadu POST etmek için bir submit handlera da ihtiyacınız var.
+}
+
+return (
+  <div id="wrapper" className={props.className}>
+    <div className="info">
+      <h3 id="coordinates">Koordinatlar (2, 2)</h3>
+      <h3 id="steps">{steps} kere ilerlediniz</h3>
     </div>
-  )
+    <div id="grid">
+      {
+        [0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
+          <div key={idx} className={`square${idx === index ? ' active' : ''}`}>
+            {idx === index ? 'B' : null}
+          </div>
+        ))
+      }
+    </div>
+    <div className="info">
+      <h3 id="message">{message}</h3>
+    </div>
+    <div id="keypad">
+      <button onClick={ilerle} id="left">SOL</button>
+      <button onClick={ilerle} id="up">YUKARI</button>
+      <button onClick={ilerle} id="right">SAĞ</button>
+      <button onClick={ilerle} id="down">AŞAĞI</button>
+      <button onClick={ilerle} id="reset">reset</button>
+    </div>
+    <form>
+      <input onChange={(evt) => setEmail(evt.target.value)} value={email} id="email" type="email" placeholder="email girin"></input>
+      <input id="submit" type="submit"></input>
+    </form>
+  </div>
+)
 }
